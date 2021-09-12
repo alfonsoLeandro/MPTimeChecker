@@ -1,0 +1,48 @@
+name: MPTimeChecker
+version: ${project.version}
+main: com.github.alfonsoLeandro.timechecker.TimeChecker
+api-version: "1.13"
+depend: [MPUtils]
+softdepend: [PlaceholderAPI]
+authors: [lelesape]
+description: ${project.description}
+website: http://bit.ly/2mwvHWN
+
+commands:
+  timechecker:
+    description: Main command
+    aliases: [tc]
+    usage: /command help|version| reload
+
+permissions:
+  timechecker.version:
+    description: Allows you to check the plugins version
+    default: op
+  timechecker.reload:
+    description: Allows you to reload the plugin
+    default: op
+  timechecker.check:
+    description: Allows you to check your own time on this server
+    default: op
+  timchecker.check.others:
+    description: Allows you to check other people's time on this server
+  timechecker.session:
+    description: Allows you to check your own time on this server for the last session
+    default: op
+  timchecker.session.others:
+    description: Allows you to check other people's time on this server for their last session
+    default: op
+  timechecker.top:
+    description: Allows you to see the top 10 players wit hthe most time on the server
+    default: op
+  timechecker.*:
+    description: Gives access to every permission available
+    default: op
+    children:
+      timechecker.version: true
+      timechecker.reload: true
+      timechecker.check: true
+      timechecker.check.others: true
+      timechecker.session: true
+      timechecker.session.others: true
+      timechecker.top: true
