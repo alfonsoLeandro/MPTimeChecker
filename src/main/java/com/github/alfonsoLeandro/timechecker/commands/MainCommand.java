@@ -33,8 +33,9 @@ public final class MainCommand implements CommandExecutor {
     private String selfSessionCheck;
     private String otherSessionCheck;
     private String calculating;
-    private String top10;
+    private String topList;
     private String topPlayer;
+    private int amountTop;
 
     /**
      * MainCommand class constructor.
@@ -62,7 +63,8 @@ public final class MainCommand implements CommandExecutor {
         selfSessionCheck = config.getString("config.messages.self session check");
         otherSessionCheck = config.getString("config.messages.other session check");
         calculating = config.getString("config.messages.calculating");
-        top10 = config.getString("config.messages.top 10");
+        amountTop = config.getInt("config.messages.amount top");
+        topList = config.getString("config.messages.top list").replaceAll("%amounttop%", String.valueOf(amountTop));
         topPlayer = config.getString("config.messages.top player");
     }
 
@@ -219,8 +221,8 @@ public final class MainCommand implements CommandExecutor {
             }
             send(sender, calculating);
 
-            CompletableFuture.supplyAsync(this::getTop10)
-                    .thenAcceptAsync(k -> sendTop10(sender, k));
+            CompletableFuture.supplyAsync(this::getTop)
+                    .thenAcceptAsync(k -> sendTop(sender, k));
 
 
             //unknown command
@@ -237,7 +239,7 @@ public final class MainCommand implements CommandExecutor {
      * Gets an descending ordered map containing the top 10 players with the most playtime.
      * @return The ordered map to be displayed elsewhere.
      */
-    private LinkedHashMap<OfflinePlayer, String> getTop10(){
+    private LinkedHashMap<OfflinePlayer, String> getTop(){
         Map<OfflinePlayer, Integer> allPlayers = new HashMap<>();
 
         for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
@@ -249,28 +251,27 @@ public final class MainCommand implements CommandExecutor {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
 
-        LinkedHashMap<OfflinePlayer, String> top10 = new LinkedHashMap<>();
+        LinkedHashMap<OfflinePlayer, String> top = new LinkedHashMap<>();
         List<OfflinePlayer> players = new ArrayList<>(sortedMap.keySet());
 
-
-        for(int i = sortedMap.size() - 1 ; i >= Math.max(0, sortedMap.size()-10); i--) {
+        for(int i = sortedMap.size() - 1 ; i >= Math.max(0, sortedMap.size()-amountTop); i--) {
             OfflinePlayer player = players.get(i);
-            top10.put(player, getTime(player.getStatistic(Statistic.PLAY_ONE_MINUTE)));
+            top.put(player, getTime(player.getStatistic(Statistic.PLAY_ONE_MINUTE)));
         }
 
-        return top10;
+        return top;
     }
 
     /**
      * Sends a given map of players and strings to the commandSender.
-     * @param top10Map Said map.
+     * @param topMap Said map.
      */
-    private void sendTop10(CommandSender sender, Map<OfflinePlayer, String> top10Map){
-        send(sender, top10);
+    private void sendTop(CommandSender sender, Map<OfflinePlayer, String> topMap){
+        send(sender, topList);
         int j = 1;
 
-        for(OfflinePlayer player : top10Map.keySet()){
-            send(sender, topPlayer.replace("%player%", player.getName()+"").replace("%time%", top10Map.get(player)).replace("%pos%", String.valueOf(j)));
+        for(OfflinePlayer player : topMap.keySet()){
+            send(sender, topPlayer.replace("%player%", player.getName()+"").replace("%time%", topMap.get(player)).replace("%pos%", String.valueOf(j)));
             j++;
         }
     }
