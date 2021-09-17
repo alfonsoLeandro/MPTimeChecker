@@ -12,11 +12,9 @@ config:
     self session check: '&fYou have been playing &c%time% &fon this server for this session.'
     other session check: '&c%player% &fhas been playing &c%time% &fon this server for their last session.'
     calculating: '&aCalculating...'
-
-    top list: '&6&lTOP %amounttop% players by platime:'
+    top list: '&6&lTOP %amounttop% players by playtime:'
     #Sets how big is the top number. WARNING: Big numbers might take a long time
     amount top: 10
-
     top player: '%pos%) &f%player%: &c%time%&f.'
     and: 'and'
     week: 'week'
