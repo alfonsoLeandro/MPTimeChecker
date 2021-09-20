@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -64,7 +65,7 @@ public final class MainCommand implements CommandExecutor {
         otherSessionCheck = config.getString("config.messages.other session check");
         calculating = config.getString("config.messages.calculating");
         amountTop = config.getInt("config.messages.amount top");
-        topList = config.getString("config.messages.top list").replaceAll("%amounttop%", String.valueOf(amountTop));
+        topList = Objects.requireNonNull(config.getString("config.messages.top list", "%pos%) &f%player%: &c%time%&f.")).replace("%amounttop%", String.valueOf(amountTop));
         topPlayer = config.getString("config.messages.top player");
     }
 
@@ -98,7 +99,7 @@ public final class MainCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
         if(args.length == 0 || args[0].equalsIgnoreCase("help")) {
             send(sender, "&6List of commands");
             send(sender, "&f/"+label+" help");

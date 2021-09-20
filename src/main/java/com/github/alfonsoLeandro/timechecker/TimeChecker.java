@@ -62,7 +62,7 @@ public final class TimeChecker extends JavaPlugin {
     @Override
     public void onDisable() {
         playersYaml.getAccess().set("players", null);
-        playersYaml.save();
+        playersYaml.save(false);
         send("&cDisabled&f. Version: &e" + version);
         send("&fThank you for using my plugin! &" + color + pdfFile.getName() + "&f By " + pdfFile.getAuthors().get(0));
         send("&fJoin my discord server at &chttps://discordapp.com/invite/ZznhQud");
