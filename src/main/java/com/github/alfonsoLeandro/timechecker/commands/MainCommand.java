@@ -98,6 +98,7 @@ public final class MainCommand implements CommandExecutor {
                 .replace("%and%", Objects.requireNonNull(config.getString("config.messages.and", "and")));
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
         if(args.length == 0 || args[0].equalsIgnoreCase("help")) {
@@ -237,7 +238,7 @@ public final class MainCommand implements CommandExecutor {
     }
 
     /**
-     * Gets an descending ordered map containing the top 10 players with the most playtime.
+     * Gets a descending ordered map containing the top 10 players with the most playtime.
      * @return The ordered map to be displayed elsewhere.
      */
     private LinkedHashMap<OfflinePlayer, String> getTop(){
