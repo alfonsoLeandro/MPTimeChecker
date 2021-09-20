@@ -6,20 +6,20 @@ import com.github.alfonsoLeandro.timechecker.events.JoinLeaveEvents;
 import com.github.alfonsoLeandro.timechecker.utils.PAPIPlaceholder;
 import com.github.alfonsoleandro.mputils.files.YamlFile;
 import com.github.alfonsoleandro.mputils.metrics.Metrics;
+import com.github.alfonsoleandro.mputils.reloadable.ReloaderPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public final class TimeChecker extends JavaPlugin {
+public final class TimeChecker extends ReloaderPlugin {
 
     private final PluginDescriptionFile pdfFile = getDescription();
     private final String version = pdfFile.getVersion();
