@@ -1,9 +1,9 @@
-package com.github.alfonsoLeandro.timechecker;
+package com.github.alfonsoleandro.timechecker;
 
-import com.github.alfonsoLeandro.timechecker.commands.MainCommand;
-import com.github.alfonsoLeandro.timechecker.commands.MainCommandTabCompleter;
-import com.github.alfonsoLeandro.timechecker.events.JoinLeaveEvents;
-import com.github.alfonsoLeandro.timechecker.utils.PAPIPlaceholder;
+import com.github.alfonsoleandro.timechecker.commands.MainCommand;
+import com.github.alfonsoleandro.timechecker.commands.MainCommandTabCompleter;
+import com.github.alfonsoleandro.timechecker.events.JoinLeaveEvents;
+import com.github.alfonsoleandro.timechecker.utils.PAPIPlaceholder;
 import com.github.alfonsoleandro.mputils.files.YamlFile;
 import com.github.alfonsoleandro.mputils.metrics.Metrics;
 import com.github.alfonsoleandro.mputils.reloadable.ReloaderPlugin;
@@ -23,9 +23,9 @@ public final class TimeChecker extends ReloaderPlugin {
 
     private final PluginDescriptionFile pdfFile = getDescription();
     private final String version = pdfFile.getVersion();
-    private String latestVersion;
     private final char color = 'e';
     private final String name = "&f[&" + color + pdfFile.getName() + "&f]";
+    private String latestVersion;
     private YamlFile configYaml;
     private YamlFile playersYaml;
     private PAPIPlaceholder papiExpansion;

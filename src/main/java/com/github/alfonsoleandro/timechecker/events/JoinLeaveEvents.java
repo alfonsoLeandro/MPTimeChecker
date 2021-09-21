@@ -1,6 +1,6 @@
-package com.github.alfonsoLeandro.timechecker.events;
+package com.github.alfonsoleandro.timechecker.events;
 
-import com.github.alfonsoLeandro.timechecker.TimeChecker;
+import com.github.alfonsoleandro.timechecker.TimeChecker;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;

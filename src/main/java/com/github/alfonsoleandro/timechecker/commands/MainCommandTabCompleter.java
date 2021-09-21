@@ -1,4 +1,4 @@
-package com.github.alfonsoLeandro.timechecker.commands;
+package com.github.alfonsoleandro.timechecker.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

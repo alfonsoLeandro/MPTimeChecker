@@ -1,6 +1,6 @@
-package com.github.alfonsoLeandro.timechecker.commands;
+package com.github.alfonsoleandro.timechecker.commands;
 
-import com.github.alfonsoLeandro.timechecker.TimeChecker;
+import com.github.alfonsoleandro.timechecker.TimeChecker;
 import com.github.alfonsoleandro.mputils.string.StringUtils;
 import com.github.alfonsoleandro.mputils.time.TimeUtils;
 import org.bukkit.Bukkit;

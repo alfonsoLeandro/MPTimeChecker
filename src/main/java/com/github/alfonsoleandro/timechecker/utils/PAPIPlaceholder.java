@@ -1,6 +1,6 @@
-package com.github.alfonsoLeandro.timechecker.utils;
+package com.github.alfonsoleandro.timechecker.utils;
 
-import com.github.alfonsoLeandro.timechecker.TimeChecker;
+import com.github.alfonsoleandro.timechecker.TimeChecker;
 import com.github.alfonsoleandro.mputils.time.TimeUtils;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Statistic;
