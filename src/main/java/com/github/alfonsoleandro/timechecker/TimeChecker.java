@@ -1,14 +1,14 @@
 package com.github.alfonsoleandro.timechecker;
 
+import com.github.alfonsoleandro.mputils.managers.MessageSender;
 import com.github.alfonsoleandro.timechecker.commands.MainCommand;
 import com.github.alfonsoleandro.timechecker.commands.MainCommandTabCompleter;
 import com.github.alfonsoleandro.timechecker.events.JoinLeaveEvents;
+import com.github.alfonsoleandro.timechecker.managers.TopPlayersManager;
 import com.github.alfonsoleandro.timechecker.utils.PAPIPlaceholder;
 import com.github.alfonsoleandro.mputils.files.YamlFile;
 import com.github.alfonsoleandro.mputils.metrics.Metrics;
 import com.github.alfonsoleandro.mputils.reloadable.ReloaderPlugin;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -21,22 +21,15 @@ import java.net.URL;
 
 public final class TimeChecker extends ReloaderPlugin {
 
+    private final char color = 'e';
     private final PluginDescriptionFile pdfFile = getDescription();
     private final String version = pdfFile.getVersion();
-    private final char color = 'e';
-    private final String name = "&f[&" + color + pdfFile.getName() + "&f]";
     private String latestVersion;
     private YamlFile configYaml;
     private YamlFile playersYaml;
     private PAPIPlaceholder papiExpansion;
-
-    /**
-     * Sends a message to the console, with colors and prefix added.
-     * @param msg The message to be sent.
-     */
-    private void send(String msg) {
-        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', name + " " + msg));
-    }
+    private MessageSender<Message> messageSender;
+    private TopPlayersManager topPlayersManager;
 
 
     /**
@@ -44,12 +37,15 @@ public final class TimeChecker extends ReloaderPlugin {
      */
     @Override
     public void onEnable() {
-        send("&aEnabled&f. Version: &e" + version);
-        send("&fThank you for using my plugin! &" + color + pdfFile.getName() + "&f By " + pdfFile.getAuthors().get(0));
-        send("&fJoin my discord server at &chttps://discordapp.com/invite/ZznhQud");
-        send("Please consider subscribing to my yt channel: &c" + pdfFile.getWebsite());
+        registerFiles();
+        this.messageSender = new MessageSender<>(this, Message.values(), this.configYaml,
+                "config.messages", "config.prefix");
+        this.messageSender.send("&aEnabled&f. Version: &e" + version);
+        this.messageSender.send("&fThank you for using my plugin! &" + color + pdfFile.getName() + "&f By " + pdfFile.getAuthors().get(0));
+        this.messageSender.send("&fJoin my discord server at &chttps://discordapp.com/invite/ZznhQud");
+        this.messageSender.send("Please consider subscribing to my yt channel: &c" + pdfFile.getWebsite());
+        this.topPlayersManager = new TopPlayersManager(this);
         updateChecker();
-        reloadFiles();
         registerCommands();
         registerEvents();
         startMetrics();
@@ -63,17 +59,17 @@ public final class TimeChecker extends ReloaderPlugin {
     public void onDisable() {
         playersYaml.getAccess().set("players", null);
         playersYaml.save(false);
-        send("&cDisabled&f. Version: &e" + version);
-        send("&fThank you for using my plugin! &" + color + pdfFile.getName() + "&f By " + pdfFile.getAuthors().get(0));
-        send("&fJoin my discord server at &chttps://discordapp.com/invite/ZznhQud");
-        send("Please consider subscribing to my yt channel: &c" + pdfFile.getWebsite());
+        this.messageSender.send("&cDisabled&f. Version: &e" + version);
+        this.messageSender.send("&fThank you for using my plugin! &" + color + pdfFile.getName() + "&f By " + pdfFile.getAuthors().get(0));
+        this.messageSender.send("&fJoin my discord server at &chttps://discordapp.com/invite/ZznhQud");
+        this.messageSender.send("Please consider subscribing to my yt channel: &c" + pdfFile.getWebsite());
         unRegisterPAPIPlaceholder();
     }
 
-    //
-    //updates
-    //
-    public void updateChecker(){
+    /**
+     * Checks for a new update in spigot.
+     */
+    public void updateChecker() {
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(
                     "https://api.spigotmc.org/legacy/update.php?resource=89890").openConnection();
@@ -81,22 +77,22 @@ public final class TimeChecker extends ReloaderPlugin {
             con.setConnectTimeout(timed_out);
             con.setReadTimeout(timed_out);
             latestVersion = new BufferedReader(new InputStreamReader(con.getInputStream())).readLine();
-            if (latestVersion.length() <= 7) {
-                if(!version.equals(latestVersion)){
+            if(latestVersion.length() <= 7) {
+                if(!version.equals(latestVersion)) {
                     String exclamation = "&e&l(&4&l!&e&l)";
-                    send(exclamation+"&c There is a new version available. &e(&7"+ latestVersion +"&e)");
-                    send(exclamation+"&c Download it here:&f http://bit.ly/TimeCheckerUpdate");
+                    this.messageSender.send(exclamation + "&c There is a new version available. &e(&7" + latestVersion + "&e)");
+                    this.messageSender.send(exclamation + "&c Download it here:&f http://bit.ly/TimeCheckerUpdate");
                 }
             }
         } catch (Exception ex) {
-            send("Error while checking updates.");
+            this.messageSender.send("Error while checking updates.");
         }
     }
 
 
-
     /**
      * Gets the plugins current version.
+     *
      * @return The version string.
      */
     public String getVersion() {
@@ -105,6 +101,7 @@ public final class TimeChecker extends ReloaderPlugin {
 
     /**
      * Gets the plugins latest version available on spigot.
+     *
      * @return The latest version string.
      */
     public String getLatestVersion() {
@@ -115,37 +112,47 @@ public final class TimeChecker extends ReloaderPlugin {
     /**
      * Starts bStats metrics collection
      */
-    private void startMetrics(){
+    private void startMetrics() {
         new Metrics(this, 9345);
     }
 
-    public void registerPAPIPlaceholder(){
+    public void registerPAPIPlaceholder() {
         Plugin papi = getServer().getPluginManager().getPlugin("PlaceholderAPI");
-        if(papi != null && papi.isEnabled()){
-            send("&aPlaceholderAPI found, the placeholder has been registered successfully");
+        if(papi != null && papi.isEnabled()) {
+            this.messageSender.send("&aPlaceholderAPI found, the placeholder has been registered successfully");
             papiExpansion = new PAPIPlaceholder(this);
             papiExpansion.register();
-        }else{
-            send("&cPlaceholderAPI not found, the placeholder was not registered");
+        } else {
+            this.messageSender.send("&cPlaceholderAPI not found, the placeholder was not registered");
         }
     }
 
-    private void unRegisterPAPIPlaceholder(){
+    private void unRegisterPAPIPlaceholder() {
         Plugin papi = getServer().getPluginManager().getPlugin("PlaceholderAPI");
-        if(papi != null && papi.isEnabled() && papiExpansion != null){
+        if(papi != null && papi.isEnabled() && papiExpansion != null) {
             papiExpansion.unregister();
         }
     }
 
 
     /**
-     * Registers and reloads plugin files.
+     * Registers plugin files.
      */
-    public void reloadFiles() {
+    public void registerFiles() {
         configYaml = new YamlFile(this, "config.yml");
         playersYaml = new YamlFile(this, "players.yml");
     }
 
+    /**
+     * Reloads plugin files.
+     */
+    public void reloadFiles() {
+        configYaml.saveDefault();
+        configYaml.loadFileConfiguration();
+
+        playersYaml.saveDefault();
+        playersYaml.loadFileConfiguration();
+    }
 
 
     /**
@@ -161,27 +168,53 @@ public final class TimeChecker extends ReloaderPlugin {
     /**
      * Registers the event listeners.
      */
-    private void registerEvents(){
+    private void registerEvents() {
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new JoinLeaveEvents(this), this);
     }
 
     /**
      * Get the config YamlFile.
+     *
      * @return The YamlFile containing the config.
      */
-    public YamlFile getConfigYaml(){
+    public YamlFile getConfigYaml() {
         return this.configYaml;
     }
 
     /**
      * Get the players YamlFile.
+     *
      * @return The YamlFile containing the players file.
      */
-    public YamlFile getPlayersYaml(){
+    public YamlFile getPlayersYaml() {
         return this.playersYaml;
+    }
+
+    /**
+     * Gets the message sending manager for this plugin.
+     * @return Gets the unique instance of the MessageSender object for this plugin.
+     */
+    public MessageSender<Message> getMessageSender(){
+        return this.messageSender;
     }
 
 
 
+    public enum Message{
+        NO_PERMISSION,
+        UNKNOWN_COMMAND,
+        RELOADED,
+        CANNOT_CHECK_CONSOLE,
+        NOT_EXIST,
+        SELF_CHECK,
+        OTHER_CHECK,
+        ERROR_CHECKING_SESSION,
+        SELF_SESSION_CHECK,
+        OTHER_SESSION_CHECK,
+        CALCULATING,
+        AMOUNT_TOP,
+        TOP_LIST,
+        TOP_PLAYER
+    }
 }

@@ -24,7 +24,7 @@ public class TopPlayersManager extends Reloadable {
 
 
     @Override
-    public void reload() {
+    public void reload(boolean deep) {
         generateTops();
     }
 }
