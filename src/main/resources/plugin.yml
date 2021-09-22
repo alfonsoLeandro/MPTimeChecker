@@ -1,6 +1,6 @@
 name: MPTimeChecker
 version: ${project.version}
-main: com.github.alfonsoLeandro.timechecker.TimeChecker
+main: com.github.alfonsoleandro.timechecker.TimeChecker
 api-version: "1.13"
 depend: [MPUtils]
 softdepend: [PlaceholderAPI]

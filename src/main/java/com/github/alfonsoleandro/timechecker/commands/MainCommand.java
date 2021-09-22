@@ -2,7 +2,7 @@ package com.github.alfonsoleandro.timechecker.commands;
 
 import com.github.alfonsoleandro.mputils.managers.MessageSender;
 import com.github.alfonsoleandro.timechecker.TimeChecker;
-import com.github.alfonsoleandro.mputils.time.TimeUtils;
+import com.github.alfonsoleandro.timechecker.managers.TopPlayersManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Statistic;
@@ -14,13 +14,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-
-
 public final class MainCommand implements CommandExecutor {
 
-    final private TimeChecker plugin;
+    private final TimeChecker plugin;
     private final MessageSender<TimeChecker.Message> messageSender;
+    private final TopPlayersManager topPlayersManager;
 
     /**
      * MainCommand class constructor.
@@ -29,29 +27,11 @@ public final class MainCommand implements CommandExecutor {
     public MainCommand(TimeChecker plugin){
         this.plugin = plugin;
         this.messageSender = plugin.getMessageSender();
+        this.topPlayersManager = plugin.getTopPlayersManager();
     }
 
 
-    /**
-     * Translates and amount of ticks into days, hours and minutes.
-     * @param ticks The amount of ticks to translate
-     * @return A string with an h,m and s format.
-     */
-    private String getTime(long ticks){
-        FileConfiguration config = plugin.getConfigYaml().getAccess();
-        return TimeUtils.getTimeString(ticks)
-                .replace("%weeks%", Objects.requireNonNull(config.getString("config.messages.weeks", "weeks")))
-                .replace("%week%", Objects.requireNonNull(config.getString("config.messages.week", "week")))
-                .replace("%days%", Objects.requireNonNull(config.getString("config.messages.days", "days")))
-                .replace("%day%", Objects.requireNonNull(config.getString("config.messages.day", "day")))
-                .replace("%hours%", Objects.requireNonNull(config.getString("config.messages.hours", "hours")))
-                .replace("%hour%", Objects.requireNonNull(config.getString("config.messages.hour", "hour")))
-                .replace("%minutes%", Objects.requireNonNull(config.getString("config.messages.minutes", "minutes")))
-                .replace("%minute%", Objects.requireNonNull(config.getString("config.messages.minute", "minute")))
-                .replace("%seconds%", Objects.requireNonNull(config.getString("config.messages.seconds", "seconds")))
-                .replace("%second%", Objects.requireNonNull(config.getString("config.messages.second", "second")))
-                .replace("%and%", Objects.requireNonNull(config.getString("config.messages.and", "and")));
-    }
+
 
     @SuppressWarnings("deprecation")
     @Override
@@ -64,6 +44,7 @@ public final class MainCommand implements CommandExecutor {
             this.messageSender.send(sender, "&f/"+label+" check <player>");
             this.messageSender.send(sender, "&f/"+label+" session <player>");
             this.messageSender.send(sender, "&f/"+label+" top");
+            this.messageSender.send(sender, "&f/"+label+" worst");
 
 
 
@@ -104,7 +85,7 @@ public final class MainCommand implements CommandExecutor {
                 int ticks = ((Player) sender).getStatistic(Statistic.PLAY_ONE_MINUTE);
 
                 this.messageSender.send(sender, TimeChecker.Message.SELF_CHECK,
-                        "%time%", getTime(ticks));
+                        "%time%", topPlayersManager.getTime(ticks));
 
             } else {
                 if(!sender.hasPermission("timeChecker.check.others")) {
@@ -119,7 +100,7 @@ public final class MainCommand implements CommandExecutor {
 
                     this.messageSender.send(sender, TimeChecker.Message.OTHER_CHECK,
                             "%player%", args[1],
-                            "%time%", getTime(ticks));
+                            "%time%", topPlayersManager.getTime(ticks));
 
                 } else {
                     this.messageSender.send(sender, TimeChecker.Message.NOT_EXIST);
@@ -149,7 +130,7 @@ public final class MainCommand implements CommandExecutor {
                 long ticks = (System.currentTimeMillis() - players.getLong("players." + sender.getName())) / 50;
 
                 this.messageSender.send(sender, TimeChecker.Message.SELF_SESSION_CHECK,
-                        "%time%", getTime(ticks));
+                        "%time%", topPlayersManager.getTime(ticks));
 
             } else {
                 if(!sender.hasPermission("timeChecker.session.others")) {
@@ -169,7 +150,7 @@ public final class MainCommand implements CommandExecutor {
 
                     this.messageSender.send(sender, TimeChecker.Message.OTHER_SESSION_CHECK,
                             "%player%", args[1],
-                            "%time%", getTime(ticks));
+                            "%time%", topPlayersManager.getTime(ticks));
 
                 } else {
                     this.messageSender.send(sender, TimeChecker.Message.NOT_EXIST);
@@ -181,10 +162,16 @@ public final class MainCommand implements CommandExecutor {
                 this.messageSender.send(sender, TimeChecker.Message.NO_PERMISSION);
                 return true;
             }
-            this.messageSender.send(sender, TimeChecker.Message.CALCULATING);
 
-//            CompletableFuture.supplyAsync(this::getTop)
-//                    .thenAcceptAsync(k -> sendTop(sender, k));
+            this.topPlayersManager.sendTop(sender);
+
+        }else if(args[0].equalsIgnoreCase("worst")){
+            if(!sender.hasPermission("timeChecker.top")){
+                this.messageSender.send(sender, TimeChecker.Message.NO_PERMISSION);
+                return true;
+            }
+
+            this.topPlayersManager.sendWorst(sender);
 
 
             //unknown command

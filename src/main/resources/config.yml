@@ -1,5 +1,7 @@
 config:
   prefix: '&f[&eMPTimeChecker&f]'
+  amount top: 10
+  amount worst: 10
   messages:
     no permission: '&cNo permission'
     unknown command: '&cUnknown command. &fTry /%command% help'
@@ -13,9 +15,9 @@ config:
     other session check: '&c%player% &fhas been playing &c%time% &fon this server for their last session.'
     calculating: '&aCalculating...'
     top list: '&6&lTOP %amounttop% players by playtime:'
+    worst list: '&6&lWORST %amounttop% players by playtime:'
     #Sets how big is the top number. WARNING: Big numbers might take a long time
-    amount top: 10
-    top player: '%pos%) &f%player%: &c%time%&f.'
+    top player: '&f%pos%) &f%player%: &c%time%&f.'
     and: 'and'
     week: 'week'
     weeks: 'weeks'
