@@ -1,11 +1,11 @@
 package com.github.alfonsoleandro.timechecker;
 
 import com.github.alfonsoleandro.mputils.managers.MessageSender;
-import com.github.alfonsoleandro.mputils.misc.MessageEnum;
 import com.github.alfonsoleandro.timechecker.commands.MainCommand;
 import com.github.alfonsoleandro.timechecker.commands.MainCommandTabCompleter;
 import com.github.alfonsoleandro.timechecker.events.JoinLeaveEvents;
 import com.github.alfonsoleandro.timechecker.managers.TopPlayersManager;
+import com.github.alfonsoleandro.timechecker.utils.Message;
 import com.github.alfonsoleandro.timechecker.utils.PAPIPlaceholder;
 import com.github.alfonsoleandro.mputils.files.YamlFile;
 import com.github.alfonsoleandro.mputils.metrics.Metrics;
@@ -215,42 +215,4 @@ public final class TimeChecker extends ReloaderPlugin {
 
 
 
-    public enum Message implements MessageEnum {
-        NO_PERMISSION("&cNo permission"),
-        UNKNOWN_COMMAND("&cUnknown command"),
-        RELOADED("&aPlugin reloaded!"),
-        CANNOT_CHECK_CONSOLE("&cCannot check console"),
-        NOT_EXIST("&cThat player does not exist"),
-        SELF_CHECK("&fYou have been playing for: &e%time%"),
-        OTHER_CHECK("&f%player% has been playing in this server for &e%time%"),
-        ERROR_CHECKING_SESSION("&cThere has been an error while checking for %player%'s session"),
-        SELF_SESSION_CHECK("&fThis session: &e%time%"),
-        OTHER_SESSION_CHECK("&f%player%'s session: &e%time%"),
-        TOP_LIST("&6&lTOP %amounttop% players by playtime"),
-        WORST_LIST("&6&lWORST %amounttop% players by playtime"),
-        TOP_PLAYER("&f%pos%) %player%: &c%time%"),
-        WEEKS("weeks"),
-        WEEK("week"),
-        DAYS("days"),
-        DAY("day"),
-        HOURS("hours"),
-        HOUR("hour"),
-        MINUTES("minutes"),
-        MINUTE("minute"),
-        SECONDS("seconds"),
-        SECOND("second"),
-        AND("and");
-
-
-        private final String dflt;
-
-        Message(String dflt){
-            this.dflt = dflt;
-        }
-
-        @Override
-        public String getDefault() {
-            return this.dflt;
-        }
-    }
 }

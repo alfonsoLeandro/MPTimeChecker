@@ -4,6 +4,7 @@ import com.github.alfonsoleandro.mputils.managers.MessageSender;
 import com.github.alfonsoleandro.mputils.time.TimeUtils;
 import com.github.alfonsoleandro.timechecker.TimeChecker;
 import com.github.alfonsoleandro.mputils.reloadable.Reloadable;
+import com.github.alfonsoleandro.timechecker.utils.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Statistic;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 public class TopPlayersManager extends Reloadable {
 
     private final TimeChecker plugin;
-    private final MessageSender<TimeChecker.Message> messageSender;
+    private final MessageSender<Message> messageSender;
     private final LinkedHashMap<OfflinePlayer, String> topPlayers = new LinkedHashMap<>();
     private final LinkedHashMap<OfflinePlayer, String> worstPlayers = new LinkedHashMap<>();
     private int amountTop;
@@ -29,8 +30,11 @@ public class TopPlayersManager extends Reloadable {
         generateTops();
     }
 
+    /**
+     * Generates the top best and worst players.
+     */
     private void generateTops(){
-        Bukkit.broadcastMessage("CALCULATING TOPS");
+        Bukkit.broadcastMessage("CALCULATING TOPS"); //todo: remove debug
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -60,7 +64,7 @@ public class TopPlayersManager extends Reloadable {
                     OfflinePlayer player = players.get(i);
                     worstPlayers.put(player, getTime(player.getStatistic(Statistic.PLAY_ONE_MINUTE)));
                 }
-                Bukkit.broadcastMessage("TOPS CALCULATED");
+                Bukkit.broadcastMessage("TOPS CALCULATED"); //todo: remove debug
 
             }
         }.runTaskAsynchronously(plugin);
@@ -70,12 +74,12 @@ public class TopPlayersManager extends Reloadable {
      * Sends a top of the best players by playtime.
      */
     public void sendTop(CommandSender sender) {
-        this.messageSender.send(sender, TimeChecker.Message.TOP_LIST,
+        this.messageSender.send(sender, Message.TOP_LIST,
                 "%amounttop%", String.valueOf(amountTop));
         int j = 1;
 
         for (OfflinePlayer player : topPlayers.keySet()) {
-            this.messageSender.send(sender, TimeChecker.Message.TOP_PLAYER,
+            this.messageSender.send(sender, Message.TOP_PLAYER,
                     "%player%", player.getName() + "",
                     "%time%", topPlayers.get(player),
                     "%pos%", String.valueOf(j));
@@ -87,18 +91,52 @@ public class TopPlayersManager extends Reloadable {
      * Sends a top of the worst players by playtime to the given command sender.
      */
     public void sendWorst(CommandSender sender) {
-        this.messageSender.send(sender, TimeChecker.Message.WORST_LIST,
+        this.messageSender.send(sender, Message.WORST_LIST,
                 "%amountworst%", String.valueOf(amountWorst));
         int j = 1;
 
         for (OfflinePlayer player : worstPlayers.keySet()) {
-            this.messageSender.send(sender, TimeChecker.Message.TOP_PLAYER,
+            this.messageSender.send(sender, Message.TOP_PLAYER,
                     "%player%", player.getName() + "",
                     "%time%", worstPlayers.get(player),
                     "%pos%", String.valueOf(j));
             j++;
         }
+    }
 
+
+    /**
+     * Gets the top position for the given place in the best players top (by playtime).
+     * @param place The place requested.
+     * @return The player that is in the given place of the top, or a configurable error message.
+     */
+    public String getTopTime(int place){
+        place = Math.max(Math.min(place, 1), amountTop-1);
+
+        int i = 1;
+        for(OfflinePlayer player : worstPlayers.keySet()){
+            if(i == place) return worstPlayers.get(player);
+            i++;
+        }
+
+        return messageSender.getString(Message.ERROR_WHILE_GETTING_PLAYER);
+    }
+
+    /**
+     * Gets the top position for the given place in the worst players top (by playtime).
+     * @param place The place requested.
+     * @return The player that is in the given place of the top, or a configurable error message.
+     */
+    public String getWorstTime(int place){
+        place = Math.max(Math.min(place, 1), amountWorst-1);
+
+        int i = 1;
+        for(OfflinePlayer player : worstPlayers.keySet()){
+            if(i == place) return worstPlayers.get(player);
+            i++;
+        }
+
+        return messageSender.getString(Message.ERROR_WHILE_GETTING_PLAYER);
     }
 
     /**
@@ -108,17 +146,17 @@ public class TopPlayersManager extends Reloadable {
      */
     public String getTime(long ticks){
         return TimeUtils.getTimeString(ticks)
-                .replace("%weeks%", " "+messageSender.getString(TimeChecker.Message.WEEKS))
-                .replace("%week%", " "+messageSender.getString(TimeChecker.Message.WEEK))
-                .replace("%days%", " "+messageSender.getString(TimeChecker.Message.DAYS))
-                .replace("%day%", " "+messageSender.getString(TimeChecker.Message.DAY))
-                .replace("%hours%", " "+messageSender.getString(TimeChecker.Message.HOURS))
-                .replace("%hour%", " "+messageSender.getString(TimeChecker.Message.HOUR))
-                .replace("%minutes%", " "+messageSender.getString(TimeChecker.Message.MINUTES))
-                .replace("%minute%", " "+messageSender.getString(TimeChecker.Message.MINUTE))
-                .replace("%seconds%", " "+messageSender.getString(TimeChecker.Message.SECONDS))
-                .replace("%second%", " "+messageSender.getString(TimeChecker.Message.SECOND))
-                .replace("%and%", " "+messageSender.getString(TimeChecker.Message.AND));
+                .replace("%weeks%", " "+messageSender.getString(Message.WEEKS))
+                .replace("%week%", " "+messageSender.getString(Message.WEEK))
+                .replace("%days%", " "+messageSender.getString(Message.DAYS))
+                .replace("%day%", " "+messageSender.getString(Message.DAY))
+                .replace("%hours%", " "+messageSender.getString(Message.HOURS))
+                .replace("%hour%", " "+messageSender.getString(Message.HOUR))
+                .replace("%minutes%", " "+messageSender.getString(Message.MINUTES))
+                .replace("%minute%", " "+messageSender.getString(Message.MINUTE))
+                .replace("%seconds%", " "+messageSender.getString(Message.SECONDS))
+                .replace("%second%", " "+messageSender.getString(Message.SECOND))
+                .replace("%and%", messageSender.getString(Message.AND));
     }
 
 

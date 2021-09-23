@@ -2,6 +2,7 @@ package com.github.alfonsoleandro.timechecker.events;
 
 import com.github.alfonsoleandro.mputils.managers.MessageSender;
 import com.github.alfonsoleandro.timechecker.TimeChecker;
+import com.github.alfonsoleandro.timechecker.utils.Message;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,7 +13,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public final class JoinLeaveEvents implements Listener {
 
     private final TimeChecker plugin;
-    private final MessageSender<TimeChecker.Message> messageSender;
+    private final MessageSender<Message> messageSender;
 
     public JoinLeaveEvents(TimeChecker plugin) {
         this.plugin = plugin;
