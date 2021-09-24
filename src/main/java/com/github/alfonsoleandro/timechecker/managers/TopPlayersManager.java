@@ -9,7 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Statistic;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,14 +22,35 @@ public class TopPlayersManager extends Reloadable {
     private final MessageSender<Message> messageSender;
     private final LinkedHashMap<OfflinePlayer, String> topPlayers = new LinkedHashMap<>();
     private final LinkedHashMap<OfflinePlayer, String> worstPlayers = new LinkedHashMap<>();
+    private BukkitTask topsTask;
     private int amountTop;
     private int amountWorst;
+    private int ticks;
 
     public TopPlayersManager(TimeChecker plugin){
         super(plugin);
         this.plugin = plugin;
         this.messageSender = plugin.getMessageSender();
+        this.ticks = TimeUtils.getTicks(plugin.getConfigYaml().getAccess().getString("config.generate tops time"));
+        if(this.ticks < 6000){
+            this.ticks = 6000;
+            messageSender.send("&cYou are generating the tops after too little time!");
+            messageSender.send("&cThis will cost your server performance.");
+            messageSender.send("&cPlease set generate tops time to a value larger than 5m in config. Value set to 5m");
+        }
+        automaticallyGenerateTops();
         generateTops();
+    }
+
+    private void automaticallyGenerateTops(){
+        this.topsTask = new BukkitRunnable(){
+
+            @Override
+            public void run(){
+                generateTops();
+            }
+
+        }.runTaskTimerAsynchronously(plugin, 0, this.ticks);
     }
 
     /**
@@ -35,40 +58,37 @@ public class TopPlayersManager extends Reloadable {
      */
     private void generateTops(){
         Bukkit.broadcastMessage("CALCULATING TOPS"); //todo: remove debug
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                //Grab all players and put them in a hashmap.
-                Map<OfflinePlayer, Integer> allPlayers = new HashMap<>();
-                for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-                    allPlayers.put(player, player.getStatistic(Statistic.PLAY_ONE_MINUTE));
-                }
+        //Grab all players and put them in a hashmap.
+        Map<OfflinePlayer, Integer> allPlayers = new HashMap<>();
+        for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+            allPlayers.put(player, player.getStatistic(Statistic.PLAY_ONE_MINUTE));
+        }
 
 
-                LinkedHashMap<OfflinePlayer, Integer> sortedMap = allPlayers.entrySet().stream()
-                        .sorted(Map.Entry.comparingByValue())
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        LinkedHashMap<OfflinePlayer, Integer> sortedMap = allPlayers.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
 
-                topPlayers.clear();
-                List<OfflinePlayer> players = new ArrayList<>(sortedMap.keySet());
+        topPlayers.clear();
+        List<OfflinePlayer> players = new ArrayList<>(sortedMap.keySet());
 
-                for (int i = sortedMap.size() - 1; i >= Math.max(0, sortedMap.size() - amountTop); i--) {
-                    OfflinePlayer player = players.get(i);
-                    topPlayers.put(player, getTime(player.getStatistic(Statistic.PLAY_ONE_MINUTE)));
-                }
+        for (int i = sortedMap.size() - 1; i >= Math.max(0, sortedMap.size() - amountTop); i--) {
+            OfflinePlayer player = players.get(i);
+            topPlayers.put(player, getTime(player.getStatistic(Statistic.PLAY_ONE_MINUTE)));
+        }
 
-                worstPlayers.clear();
+        worstPlayers.clear();
 
-                for (int i = 0; i < Math.min(sortedMap.size(), amountWorst); i++) {
-                    OfflinePlayer player = players.get(i);
-                    worstPlayers.put(player, getTime(player.getStatistic(Statistic.PLAY_ONE_MINUTE)));
-                }
-                Bukkit.broadcastMessage("TOPS CALCULATED"); //todo: remove debug
+        for (int i = 0; i < Math.min(sortedMap.size(), amountWorst); i++) {
+            OfflinePlayer player = players.get(i);
+            worstPlayers.put(player, getTime(player.getStatistic(Statistic.PLAY_ONE_MINUTE)));
+        }
+        Bukkit.broadcastMessage("TOPS CALCULATED"); //todo: remove debug
 
-            }
-        }.runTaskAsynchronously(plugin);
     }
+
+
 
     /**
      * Sends a top of the best players by playtime.
@@ -159,12 +179,28 @@ public class TopPlayersManager extends Reloadable {
                 .replace("%and%", messageSender.getString(Message.AND));
     }
 
+    public void reCalculateTops(){
+        if(this.topsTask != null && !this.topsTask.isCancelled()){
+            this.topsTask.cancel();
+        }
+        automaticallyGenerateTops();
+    }
+
 
     @Override
     public void reload(boolean deep) {
-        this.amountTop = plugin.getConfigYaml().getAccess().getInt("config.amount top");
-        this.amountWorst = plugin.getConfigYaml().getAccess().getInt("config.amount worst");
-        generateTops();
+        FileConfiguration config = plugin.getConfigYaml().getAccess();
+
+        this.ticks = TimeUtils.getTicks(config.getString("config.generate tops time"));
+        if(this.ticks < 6000){
+            this.ticks = 6000;
+            messageSender.send("&cYou are generating the tops after too little time!");
+            messageSender.send("&cThis will cost your server performance.");
+            messageSender.send("&cPlease set generate tops time to a value larger than 5m in config. Value set to 5m");
+        }
+        this.amountTop = config.getInt("config.amount top");
+        this.amountWorst = config.getInt("config.amount worst");
+        reCalculateTops();
     }
 
 }

@@ -10,6 +10,8 @@ import com.github.alfonsoleandro.timechecker.utils.PAPIPlaceholder;
 import com.github.alfonsoleandro.mputils.files.YamlFile;
 import com.github.alfonsoleandro.mputils.metrics.Metrics;
 import com.github.alfonsoleandro.mputils.reloadable.ReloaderPlugin;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -38,9 +40,19 @@ public final class TimeChecker extends ReloaderPlugin {
      */
     @Override
     public void onEnable() {
-        registerFiles();
-        this.messageSender = new MessageSender<>(this, Message.values(), this.configYaml,
-                "config.messages", "config.prefix");
+        try {
+            registerFiles();
+            this.messageSender = new MessageSender<>(this, Message.values(), this.configYaml,
+                    "config.messages", "config.prefix");
+        }catch (NoSuchMethodError e){
+            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&f["+color+pdfFile.getName()+"&f] &c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&f["+color+pdfFile.getName()+"&f] &cThis plugin needs MPUtils at least 1.9.2."));
+            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&f["+color+pdfFile.getName()+"&f] &c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+            throw e;
+        }
         this.messageSender.send("&aEnabled&f. Version: &e" + version);
         this.messageSender.send("&fThank you for using my plugin! &" + color + pdfFile.getName() + "&f By " + pdfFile.getAuthors().get(0));
         this.messageSender.send("&fJoin my discord server at &chttps://discordapp.com/invite/ZznhQud");
@@ -166,7 +178,13 @@ public final class TimeChecker extends ReloaderPlugin {
      */
     private void registerCommands() {
         PluginCommand mainCommand = getCommand("timeChecker");
-        assert mainCommand != null;
+
+        if(mainCommand == null){
+            this.messageSender.send("&cThere's been an error while trying to register a command for TimeChecker");
+            this.messageSender.send("&cPlease make sure your .jar file is valid. Disabling TimeChecker");
+            this.setEnabled(false);
+            return;
+        }
         mainCommand.setExecutor(new MainCommand(this));
         mainCommand.setTabCompleter(new MainCommandTabCompleter());
     }

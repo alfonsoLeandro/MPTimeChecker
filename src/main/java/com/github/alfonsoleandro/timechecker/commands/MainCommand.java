@@ -42,6 +42,7 @@ public final class MainCommand implements CommandExecutor {
             this.messageSender.send(sender, "&f/"+label+" help");
             this.messageSender.send(sender, "&f/"+label+" version");
             this.messageSender.send(sender, "&f/"+label+" reload");
+            this.messageSender.send(sender, "&f/"+label+" reCalc");
             this.messageSender.send(sender, "&f/"+label+" check <player>");
             this.messageSender.send(sender, "&f/"+label+" session <player>");
             this.messageSender.send(sender, "&f/"+label+" top");
@@ -56,6 +57,16 @@ public final class MainCommand implements CommandExecutor {
             }
             plugin.reload(false);
             this.messageSender.send(sender, Message.RELOADED);
+
+
+
+        }else if(args[0].equalsIgnoreCase("reCalc")) {
+            if(!sender.hasPermission("timeChecker.reload")) {
+                this.messageSender.send(sender, Message.NO_PERMISSION);
+                return true;
+            }
+            plugin.reload(false);
+            this.messageSender.send(sender, Message.RECALCULATING_TOPS);
 
 
         }else if(args[0].equalsIgnoreCase("version")) {

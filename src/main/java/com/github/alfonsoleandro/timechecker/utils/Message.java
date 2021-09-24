@@ -17,6 +17,7 @@ public enum Message implements MessageEnum {
     WORST_LIST("&6&lWORST %amounttop% players by playtime"),
     TOP_PLAYER("&f%pos%) %player%: &c%time%"),
     ERROR_WHILE_GETTING_PLAYER("&cThere has been an error while calculating a player for the top."),
+    RECALCULATING_TOPS("&cThere has been an error while calculating a player for the top."),
     WEEKS("weeks"),
     WEEK("week"),
     DAYS("days"),
