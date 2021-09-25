@@ -13,6 +13,8 @@ import com.github.alfonsoleandro.mputils.reloadable.ReloaderPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -21,6 +23,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class TimeChecker extends ReloaderPlugin {
 
@@ -44,7 +48,7 @@ public final class TimeChecker extends ReloaderPlugin {
             registerFiles();
             this.messageSender = new MessageSender<>(this, Message.values(), this.configYaml,
                     "config.messages", "config.prefix");
-        }catch (NoSuchMethodError e){
+        }catch (NoSuchMethodError | NoClassDefFoundError e){
             Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
                     "&f["+color+pdfFile.getName()+"&f] &c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
@@ -58,6 +62,7 @@ public final class TimeChecker extends ReloaderPlugin {
         this.messageSender.send("&fJoin my discord server at &chttps://discordapp.com/invite/ZznhQud");
         this.messageSender.send("Please consider subscribing to my yt channel: &c" + pdfFile.getWebsite());
         this.topPlayersManager = new TopPlayersManager(this);
+        checkConfigFields();
         updateChecker();
         registerCommands();
         registerEvents();
@@ -151,11 +156,39 @@ public final class TimeChecker extends ReloaderPlugin {
     /**
      * Registers plugin files.
      */
-    public void registerFiles() {
+    private void registerFiles() {
         configYaml = new YamlFile(this, "config.yml");
         playersYaml = new YamlFile(this, "players.yml");
     }
 
+    private void checkConfigFields(){
+        FileConfiguration trueConfig = YamlConfiguration.loadConfiguration(configYaml.getFile());
+        FileConfiguration config = configYaml.getAccess();
+        boolean modified = false;
+
+        Map<String,String> fields = new HashMap<String,String>(){{
+            put("config.amount top", "10");
+            put("config.amount worst", "10");
+            put("config.generate tops time", "2h");
+            put("config.messages.worst list", "&6&lWORST %amountworst% players by playtime:");
+            put("error while getting player", "&cThere''s been an error while getting the top player");
+            put("recalculating tops", "&eRecalculating tops... &7Remember that tops are automatically recalculated every X amount of time you set in config.");
+        }};
+
+        for (String key : fields.keySet()){
+            if(!trueConfig.contains(key)){
+                modified = true;
+                config.set(key, fields.get(key));
+            }
+        }
+        if(modified){
+            configYaml.save(false);
+        }
+
+
+    }
+
+    @Override
     public void reload(boolean deep){
         reloadFiles();
         super.reload(deep);

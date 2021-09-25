@@ -14,9 +14,8 @@ config:
     error checking session: '&cThe session time could not be checked.'
     self session check: '&fYou have been playing &c%time% &fon this server for this session.'
     other session check: '&c%player% &fhas been playing &c%time% &fon this server for their last session.'
-    calculating: '&aCalculating...'
     top list: '&6&lTOP %amounttop% players by playtime:'
-    worst list: '&6&lWORST %amounttop% players by playtime:'
+    worst list: '&6&lWORST %amountworst% players by playtime:'
     top player: '&f%pos%) &f%player%: &c%time%&f.'
     # Message shown when trying to get a player for the top players but there aren't enough of them in the top.
     error while getting player: '&cThere''s been an error while getting the top player'

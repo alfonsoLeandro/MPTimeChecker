@@ -31,7 +31,10 @@ public class TopPlayersManager extends Reloadable {
         super(plugin);
         this.plugin = plugin;
         this.messageSender = plugin.getMessageSender();
-        this.ticks = TimeUtils.getTicks(plugin.getConfigYaml().getAccess().getString("config.generate tops time"));
+        FileConfiguration config = plugin.getConfigYaml().getAccess();
+        this.amountTop = config.getInt("config.amount top");
+        this.amountWorst = config.getInt("config.amount worst");
+        this.ticks = TimeUtils.getTicks(config.getString("config.generate tops time"));
         if(this.ticks < 6000){
             this.ticks = 6000;
             messageSender.send("&cYou are generating the tops after too little time!");
@@ -57,7 +60,6 @@ public class TopPlayersManager extends Reloadable {
      * Generates the top best and worst players.
      */
     private void generateTops(){
-        Bukkit.broadcastMessage("CALCULATING TOPS"); //todo: remove debug
         //Grab all players and put them in a hashmap.
         Map<OfflinePlayer, Integer> allPlayers = new HashMap<>();
         for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
@@ -84,7 +86,6 @@ public class TopPlayersManager extends Reloadable {
             OfflinePlayer player = players.get(i);
             worstPlayers.put(player, getTime(player.getStatistic(Statistic.PLAY_ONE_MINUTE)));
         }
-        Bukkit.broadcastMessage("TOPS CALCULATED"); //todo: remove debug
 
     }
 
