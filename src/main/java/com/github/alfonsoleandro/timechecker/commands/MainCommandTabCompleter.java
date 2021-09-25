@@ -1,4 +1,4 @@
-package com.github.alfonsoLeandro.timechecker.commands;
+package com.github.alfonsoleandro.timechecker.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -32,6 +32,7 @@ public class MainCommandTabCompleter implements TabCompleter {
                 lista.add("check");
                 lista.add("session");
                 lista.add("top");
+                lista.add("worst");
 
             } else if(equalsToStringUnCompleted(args[0], "help")) {
                 lista.add("help");
@@ -50,6 +51,9 @@ public class MainCommandTabCompleter implements TabCompleter {
 
             } else if(equalsToStringUnCompleted(args[0], "top")) {
                 lista.add("top");
+
+            }else if(equalsToStringUnCompleted(args[0], "worst")) {
+                lista.add("worst");
             }
 
         }else if(args.length > 1){

@@ -1,21 +1,21 @@
-package com.github.alfonsoLeandro.timechecker.utils;
+package com.github.alfonsoleandro.timechecker.utils;
 
-import com.github.alfonsoLeandro.timechecker.TimeChecker;
-import com.github.alfonsoleandro.mputils.time.TimeUtils;
+import com.github.alfonsoleandro.timechecker.TimeChecker;
+import com.github.alfonsoleandro.timechecker.managers.TopPlayersManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Statistic;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public class PAPIPlaceholder extends PlaceholderExpansion {
 
     private final TimeChecker plugin;
+    private final TopPlayersManager topPlayersManager;
 
     public PAPIPlaceholder(TimeChecker plugin){
         this.plugin = plugin;
+        this.topPlayersManager = plugin.getTopPlayersManager();
     }
 
     @Override
@@ -74,9 +74,9 @@ public class PAPIPlaceholder extends PlaceholderExpansion {
 
         // %MPTimeChecker_check%
         if(identifier.equalsIgnoreCase("check")){
-            return getTime(player.getStatistic(Statistic.PLAY_ONE_MINUTE));
+            return this.topPlayersManager.getTime(player.getStatistic(Statistic.PLAY_ONE_MINUTE));
 
-        //%MPTimeChecker_session%
+            //%MPTimeChecker_session%
         }else if(identifier.equalsIgnoreCase("session")){
             FileConfiguration players = plugin.getPlayersYaml().getAccess();
 
@@ -86,33 +86,22 @@ public class PAPIPlaceholder extends PlaceholderExpansion {
             //Get session ticks
             long ticks = (System.currentTimeMillis() - players.getLong("players." + player.getName())) / 50;
 
-            return getTime(ticks);
+            return this.topPlayersManager.getTime(ticks);
+
+        }else if(identifier.contains("TOP")){
+            int place = Integer.parseInt(identifier.replace("TOP", ""));
+            return this.topPlayersManager.getTopTime(place);
+
+        }else if(identifier.contains("WORST")){
+            int place = Integer.parseInt(identifier.replace("WORST", ""));
+            return this.topPlayersManager.getWorstTime(place);
+
 
         }
 
-        // We return null if an invalid placeholder (f.e. %someplugin_placeholder3%)
+        // We return null if an invalid placeholder (f.e. %somePlugin_placeholder3%)
         // was provided
         return null;
     }
-
-    /**
-     * Translates and amount of ticks into days, hours and minutes.
-     * @param ticks The amount of ticks to translate
-     * @return A string with an h,m and s format.
-     */
-    private String getTime(long ticks){
-        FileConfiguration config = plugin.getConfigYaml().getAccess();
-        return TimeUtils.getTimeString(ticks)
-                .replace("%weeks%", Objects.requireNonNull(config.getString("config.messages.weeks", "weeks")))
-                .replace("%week%", Objects.requireNonNull(config.getString("config.messages.week", "week")))
-                .replace("%days%", Objects.requireNonNull(config.getString("config.messages.days", "days")))
-                .replace("%day%", Objects.requireNonNull(config.getString("config.messages.day", "day")))
-                .replace("%hours%", Objects.requireNonNull(config.getString("config.messages.hours", "hours")))
-                .replace("%hour%", Objects.requireNonNull(config.getString("config.messages.hour", "hour")))
-                .replace("%minutes%", Objects.requireNonNull(config.getString("config.messages.minutes", "minutes")))
-                .replace("%minute%", Objects.requireNonNull(config.getString("config.messages.minute", "minute")))
-                .replace("%seconds%", Objects.requireNonNull(config.getString("config.messages.seconds", "seconds")))
-                .replace("%second%", Objects.requireNonNull(config.getString("config.messages.second", "second")))
-                .replace("%and%", Objects.requireNonNull(config.getString("config.messages.and", "and")));
-    }
 }
+

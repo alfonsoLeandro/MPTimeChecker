@@ -6,7 +6,7 @@
 
     <groupId>com.github.alfonsoLeandro</groupId>
     <artifactId>MPTimeChecker</artifactId>
-    <version>1.2.0</version>
+    <version>2.0.0</version>
     <packaging>jar</packaging>
 
     <name>MPTimeChecker</name>
@@ -81,7 +81,7 @@
         <dependency>
             <groupId>com.github.alfonsoLeandro</groupId>
             <artifactId>MPUtils</artifactId>
-            <version>1.8.1</version>
+            <version>1.9.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
