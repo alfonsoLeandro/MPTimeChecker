@@ -35,11 +35,11 @@ public class TopPlayersManager extends Reloadable {
         this.amountTop = config.getInt("config.amount top");
         this.amountWorst = config.getInt("config.amount worst");
         this.ticks = TimeUtils.getTicks(config.getString("config.generate tops time"));
-        if(this.ticks < 6000){
-            this.ticks = 6000;
+        if(this.ticks < 100){
+            this.ticks = 100;
             messageSender.send("&cYou are generating the tops after too little time!");
             messageSender.send("&cThis will cost your server performance.");
-            messageSender.send("&cPlease set generate tops time to a value larger than 5m in config. Value set to 5m");
+            messageSender.send("&cPlease set generate tops time to a value larger than 5s in config. Value set to 5s");
         }
         automaticallyGenerateTops();
         generateTops();
@@ -129,36 +129,62 @@ public class TopPlayersManager extends Reloadable {
     /**
      * Gets the top position for the given place in the best players top (by playtime).
      * @param place The place requested.
-     * @return The player that is in the given place of the top, or a configurable error message.
+     * @return The player that is in the given place of the top, or null.
      */
-    public String getTopTime(int place){
-        place = Math.max(Math.min(place, 1), amountTop-1);
+    public OfflinePlayer getTopPlayer(int place){
+        place = Math.min(Math.max(place, 1), amountTop-1);
+
 
         int i = 1;
-        for(OfflinePlayer player : worstPlayers.keySet()){
-            if(i == place) return worstPlayers.get(player);
+        for(OfflinePlayer player : topPlayers.keySet()){
+            if(i == place) return player;
             i++;
         }
 
-        return messageSender.getString(Message.ERROR_WHILE_GETTING_PLAYER);
+        return null;
     }
 
     /**
-     * Gets the top position for the given place in the worst players top (by playtime).
-     * @param place The place requested.
-     * @return The player that is in the given place of the top, or a configurable error message.
+     * Gets the time played for a given player in the best players top.
+     * @param player The player to get the time for.
+     * @return The time for the given player.
      */
-    public String getWorstTime(int place){
-        place = Math.max(Math.min(place, 1), amountWorst-1);
+    public String getTopTime(OfflinePlayer player){
+        if(player == null || !this.topPlayers.containsKey(player)) {
+            return messageSender.getString(Message.ERROR_WHILE_GETTING_PLAYER);
+        }
+        return this.topPlayers.get(player);
+    }
+
+    /**
+     * Gets the worst position for the given place in the worst players top (by playtime).
+     * @param place The place requested.
+     * @return The player that is in the given place of the top, or null.
+     */
+    public OfflinePlayer getWorstPlayer(int place){
+        place = Math.min(Math.max(place, 1), amountWorst-1);
 
         int i = 1;
         for(OfflinePlayer player : worstPlayers.keySet()){
-            if(i == place) return worstPlayers.get(player);
+            if(i == place) return player;
             i++;
         }
 
-        return messageSender.getString(Message.ERROR_WHILE_GETTING_PLAYER);
+        return null;
     }
+
+    /**
+     * Gets the time played for a given player in the worst players top.
+     * @param player The player to get the time for.
+     * @return The time for the given player.
+     */
+    public String getWorstTime(OfflinePlayer player){
+        if(player == null || !this.worstPlayers.containsKey(player)) {
+            return messageSender.getString(Message.ERROR_WHILE_GETTING_PLAYER);
+        }
+        return this.worstPlayers.get(player);
+    }
+
 
     /**
      * Translates and amount of ticks into days, hours and minutes.
@@ -193,11 +219,11 @@ public class TopPlayersManager extends Reloadable {
         FileConfiguration config = plugin.getConfigYaml().getAccess();
 
         this.ticks = TimeUtils.getTicks(config.getString("config.generate tops time"));
-        if(this.ticks < 6000){
-            this.ticks = 6000;
+        if(this.ticks < 100){
+            this.ticks = 100;
             messageSender.send("&cYou are generating the tops after too little time!");
             messageSender.send("&cThis will cost your server performance.");
-            messageSender.send("&cPlease set generate tops time to a value larger than 5m in config. Value set to 5m");
+            messageSender.send("&cPlease set generate tops time to a value larger than 5s in config. Value set to 5s");
         }
         this.amountTop = config.getInt("config.amount top");
         this.amountWorst = config.getInt("config.amount worst");
